@@ -1,0 +1,4 @@
+```bash
+DATA='{"notification": {"body": "this is a body","title": "this is a title"}, "priority": "high", "data": {"click_action": "FLUTTER_NOTIFICATION_CLICK", "id": "1", "status": "done"}, "to": "cB7s9dqiMbk:APA91bGvv76i4Wea7Yjq8s9wDbiar_uZrhYva4EFbZtICNv6Wxj6Orko3cBQUrR8WIDV0jW8RQOlpe98u1WXAmSuKghp70rdF4qEET_2aRjfQDt9a3piNru9Z-n4Hc83C2nQYPZ2v5-2QlDBJl8MyUpJ7i4H7eARpA"}'
+curl https://fcm.googleapis.com/fcm/send -H "Content-Type:application/json" -X POST -d "$DATA" -H "Authorization: key=AAAAjLll0BM:APA91bEXXSveOL-s0ufchsW2-yl9o-Qy7Z2w01St1BQKM4ZINUrvlb8ECPZjnCKHZwkhUc6PlMLWZnzZe6paSApzN7YGP3sBB4EGJFXKSnpw0w_BPQXRvIbf9dekpRDACl-KemNYWHGQ5PRuzqQZNxwni64UY6epiA"
+```
