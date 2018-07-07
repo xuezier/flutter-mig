@@ -143,13 +143,13 @@ class Socket {
   }
 
   void parseListen(String event) {
-    print(event);
+    // print(event);
     Match match = parser(event);
     List<String> events = match.group(1).split('');
     if (events.length == 1) {
-      print(events);
+      // print(events);
       if (events[0] == CONNECT) {
-        print('connected');
+        // print('connected');
         this.emit('connect');
       } else if (events[0] == DISCONNECT) {
         this.emit('disconnect');
@@ -175,17 +175,17 @@ class Socket {
   }
 
   void processMessage(dynamic data) {
-    print(data);
+    // print(data);
     this.emit("message", data);
   }
 
   void send(String data) {
-    print(data);
+    // print(data);
     // data = '"' + data + '"';
     String sender = packetMessage(data);
     // sender = '42["message",12121212]';
     // sender = '42["message","gate.gateHandler.queryEntry{\\"token\\":\\"ddd\\",\\"timestamp\\":1530795742232}"]';
-    print('sender:' + sender);
+    // print('sender:' + sender);
     this.channel.sink.add(sender);
   }
 }

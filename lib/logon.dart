@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/request/request.dart';
-
 import 'package:flutter_flux/flutter_flux.dart';
+
+import 'package:myapp/request/request.dart';
 
 import 'package:myapp/flux/user.dart';
 
@@ -57,7 +57,7 @@ class LogonWidgetState extends State<LogonWidget>
   void _loadInfo() async {
     try {
       Map result = await request.get('/api/user/info', {});
-      print(result);
+      // print(result);
       if (result != null) {
         setUserInfoAction(result);
         Navigator.pushReplacementNamed(context, '/main');

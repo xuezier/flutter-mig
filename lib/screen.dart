@@ -7,6 +7,9 @@ import 'package:myapp/request/request.dart';
 
 import 'package:myapp/Messager.dart';
 
+import 'package:myapp/pages/me/me.dart';
+import 'package:myapp/pages/contacts/contacts.dart';
+
 class MainWidget extends StatefulWidget {
   @override
   createState() => new MainWidgetState();
@@ -14,7 +17,6 @@ class MainWidget extends StatefulWidget {
 
 class MainWidgetState extends State<MainWidget>
     with SingleTickerProviderStateMixin, StoreWatcherMixin<MainWidget> {
-
   int navigateIndex;
   UserStore userStore;
 
@@ -25,16 +27,28 @@ class MainWidgetState extends State<MainWidget>
   @override
   void initState() {
     super.initState();
-    _controller = new TabController(length: 3, vsync: this, initialIndex: 2);
-    navigateIndex = 0;
+    _controller = new TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: 2,
+    );
+    navigateIndex = 2;
     userStore = listenToStore(UserStoreToken);
+
+    _controller.addListener(this._handleTabControllerListener);
+  }
+
+  void _handleTabControllerListener() {
+    setState(() {
+      this.navigateIndex = this._controller.index;
+    });
   }
 
   void _popPress(int value) {
-    print('press pop');
-    print(value);
-    print(userStore.me.name);
-    print(userStore.me.mobile);
+    // print('press pop');
+    // print(value);
+    // print(userStore.me.name);
+    // print(userStore.me.mobile);
   }
 
   @override
@@ -96,8 +110,8 @@ class MainWidgetState extends State<MainWidget>
         controller: _controller,
         children: <Widget>[
           new Messager(),
-          Text('2'),
-          Text('3'),
+          new ContactsWidget(),
+          new MeWidget(),
         ],
       ),
       bottomNavigationBar: new BottomNavigationBar(

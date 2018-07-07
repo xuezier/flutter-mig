@@ -31,7 +31,7 @@ String packetMessage(String data) {
 }
 
 String packet16String(List<int> list) {
-  print(list);
+  // print(list);
   String result = '';
   for (int i = 0; i < list.length; i++) {
     int byte = list[i];

@@ -33,7 +33,7 @@ class PomeloClient {
     } else {
       url = '$host:$port';
     }
-    print(url);
+    // print(url);
     if (url.indexOf(protocol) < 0) {
       url = '$protocol://$url';
     }

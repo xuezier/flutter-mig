@@ -13,6 +13,7 @@ dependencies:
   shared_preferences: ^0.4.2
   http: '>=0.11.3+12'
   flutter_flux: ^4.1.1
+  firebase_messaging: ^1.0.3
 
 dev_dependencies:
   flutter_test:
@@ -31,7 +32,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
+  assets:
+    - sources/default_avatar.jpg
   #  - images/a_dot_burr.jpeg
   #  - images/a_dot_ham.jpeg
 

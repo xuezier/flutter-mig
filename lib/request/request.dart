@@ -61,7 +61,7 @@ class Request {
 
     String _refresh_token = Token.refresh_token;
 
-    print(_refresh_token);
+    // print(_refresh_token);
     if (_refresh_token == null) {
       return null;
     }
@@ -84,7 +84,7 @@ class Request {
       print(data);
       throw ('refresh_token failed');
     }
-    print(data);
+    // print(data);
 
     String access_token = data['access_token'];
     String refresh_token = data['refresh_token'];
@@ -125,8 +125,8 @@ class Request {
             queryParameters: body)
         .toString();
 
-    print(url);
-    print("TOKEN:" + Token.access_token);
+    // print(url);
+    // print("TOKEN:" + Token.access_token);
 
     Response response = await this.httpClient.get(url, headers: {
       "Authorization": "Bearer " + Token.access_token,

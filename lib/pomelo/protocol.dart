@@ -21,7 +21,6 @@ String bt2Str({Uint16List byteArray, int start, int end}) {
 }
 
 String packet16String(List<int> list) {
-  print(list);
   String result = '';
   for (int i = 0; i < list.length; i++) {
     int byte = list[i];

@@ -7,7 +7,14 @@ class UserStore extends Store {
 
   UserStore() {
     triggerOnAction(setUserInfoAction, (Map user) {
-      this._me = new User(name: user['name'], mobile: user['mobile']);
+      this._me = new User(
+        name: user['name'],
+        mobile: user['mobile'],
+        avatar: user['avatar'],
+        id: user['_id'],
+        sex: user['sex'],
+        birthdate: user['birthdate'],
+      );
     });
   }
 }

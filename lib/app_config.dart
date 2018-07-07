@@ -1,11 +1,10 @@
 import 'package:meta/meta.dart';
 
-class AppConfig   {
-  AppConfig({
-    @required this.appName,
-    @required this.flavorName,
-    @required this.apiBaseUrl
-  });
+class AppConfig {
+  AppConfig(
+      {@required this.appName,
+      @required this.flavorName,
+      @required this.apiBaseUrl});
 
   final String appName;
   final String flavorName;
@@ -15,4 +14,11 @@ class AppConfig   {
   static final String host = '127.0.0.1';
   static final int port = 3333;
   static final String url_root = 'http://127.0.0.1:3333';
+
+  static final Map<String, dynamic> chat = {
+    "schema": "http",
+    "host": '127.0.0.1',
+    "port": 9999,
+    "url_root": "http://127.0.0.1:9999"
+  };
 }
