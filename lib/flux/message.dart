@@ -29,11 +29,10 @@ class MessageStore extends Store {
 
       List<dynamic> logs = data['list'];
       List<Message> _logs = [];
-      for (int index = 0; index < logs.length; index++) {
+      for (int index = logs.length - 1; index >= 0; index--) {
         Message msg = new Message(logs[index]);
         _logs.add(msg);
       }
-
       _store.addAll(_logs);
       this.container[user] = _store;
     });

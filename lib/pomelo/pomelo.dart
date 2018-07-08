@@ -82,6 +82,8 @@ class PomeloClient {
   }
 
   void request(String route, {Map msg, Function callback}) {
+    if (msg == null) msg = {};
+
     msg = filter(msg, route);
     id++;
     callbacks[id] = callback;
@@ -101,7 +103,11 @@ class PomeloClient {
       this.callbacks.remove(id);
 
       if (fun is Function) {
-        fun(body);
+        if (body != null) {
+          fun(body);
+        } else {
+          fun();
+        }
       } else {
         return;
       }

@@ -1,4 +1,5 @@
 import 'package:flutter_flux/flutter_flux.dart';
+import 'dart:async';
 
 import 'package:myapp/models/user.dart';
 
@@ -9,6 +10,7 @@ class ContactsStore extends Store {
 
   ContactsStore() {
     triggerOnAction(setContactsListAction, (List list) {
+      Completer completer = new Completer();
       List<User> _list = [];
       for (int index = 0; index < list.length; index++) {
         Map u = list[index];
@@ -23,6 +25,8 @@ class ContactsStore extends Store {
         _list.add(user);
       }
       this._contacts = _list;
+      completer.complete(_list);
+      return completer.future;
     });
   }
 }

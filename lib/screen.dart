@@ -30,9 +30,9 @@ class MainWidgetState extends State<MainWidget>
     _controller = new TabController(
       length: 3,
       vsync: this,
-      initialIndex: 2,
+      initialIndex: 0,
     );
-    navigateIndex = 2;
+    navigateIndex = 0;
     userStore = listenToStore(UserStoreToken);
 
     _controller.addListener(this._handleTabControllerListener);

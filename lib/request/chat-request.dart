@@ -18,7 +18,6 @@ class Request {
 
   Request() {
     Token.loadFromStorage();
-    print(Url_Reg);
   }
 
   dynamic get(String url, [Map<String, dynamic> body]) async {

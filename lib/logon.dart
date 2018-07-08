@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:flutter_flux/flutter_flux.dart';
 
 import 'package:myapp/request/request.dart';
 
 import 'package:myapp/flux/user.dart';
+import 'package:myapp/flux/chat.dart';
+import 'package:myapp/flux/contacts.dart';
+
+import 'package:myapp/request/chat-request.dart' as ChatRequest;
 
 class LogonWidget extends StatefulWidget {
   @override
@@ -16,17 +21,25 @@ class LogonWidgetState extends State<LogonWidget>
   String password = '123456';
 
   UserStore userStore;
+  ChatStore chatStore;
+  ContactsStore contactsStore;
 
   Request request = new Request();
+  ChatRequest.Request chatRequest = new ChatRequest.Request();
 
   @override
   void initState() {
     userStore = listenToStore(UserStoreToken);
+    chatStore = listenToStore(ChatStoreToken);
+    contactsStore = listenToStore(ContactsStoreToken);
+
     this._init_load();
     // _loadInfo();
   }
 
   void _init_load() async {
+    await setUserStoreAction(userStore);
+
     await Token.loadFromStorage();
     await request.refresh_token();
     _loadInfo();
@@ -57,9 +70,15 @@ class LogonWidgetState extends State<LogonWidget>
   void _loadInfo() async {
     try {
       Map result = await request.get('/api/user/info', {});
+      dynamic contacts = await this.chatRequest.get('/api/user/friends/info/any');
       // print(result);
       if (result != null) {
-        setUserInfoAction(result);
+        await setUserInfoAction(result);
+
+        await initConnectAction();
+        await entryAction();
+        await setContactsListAction(contacts);
+
         Navigator.pushReplacementNamed(context, '/main');
       }
     } catch (e) {

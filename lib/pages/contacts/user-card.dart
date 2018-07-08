@@ -3,6 +3,8 @@ import 'package:flutter_flux/flutter_flux.dart';
 
 import 'package:myapp/models/user.dart';
 
+import 'package:myapp/flux/chat.dart';
+
 import 'package:myapp/pages/chat/chat.dart';
 
 class UserCardWidget extends StatefulWidget {
@@ -18,9 +20,13 @@ class UserCardWidgetState extends State<UserCardWidget>
     with StoreWatcherMixin<UserCardWidget> {
   User user;
 
+  ChatStore chatStore;
+
   @override
   initState() {
     this.user = widget.user;
+
+    this.chatStore = listenToStore(ChatStoreToken);
   }
 
   ImageProvider _renderAvatar(String avatar) {
@@ -47,11 +53,19 @@ class UserCardWidgetState extends State<UserCardWidget>
   }
 
   void _goChat() {
+    Map room = chatStore.rooms.firstWhere((Map r) {
+      User u = r['user'];
+      return u.id == user.id;
+    });
+
+    String roomid = room['roomid'];
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ChatWidget(
               user: user,
+              roomid: roomid,
             ),
       ),
     );

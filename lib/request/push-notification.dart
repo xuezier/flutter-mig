@@ -6,7 +6,6 @@ String url = AppConfig.push_url;
 
 Request request = new Request();
 void push(Map data) async {
-  print(data);
   dynamic result = await request.post(url, JSON.encode(data));
   print(result);
 }

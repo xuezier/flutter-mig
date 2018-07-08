@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class NotificationTemple {
   String body;
+  String sound = 'default';
   String title;
   NotificationTemple({this.body, this.title});
 }
@@ -11,7 +12,7 @@ class NotificationData {
   int id;
   String status = 'done';
 
-  NotificationData({this.click_action, this.id, this.status});
+  NotificationData({this.id});
 }
 
 class Notify {
@@ -19,16 +20,17 @@ class Notify {
   String priority = 'high';
   NotificationData data;
 
-  Notify({@required this.notification, this.priority, this.data});
+  Notify({@required this.notification, this.data});
 
   Map<String, dynamic> toJson() {
     return {
       "notification": {
+        "sound": this.notification.sound,
         "body": this.notification.body,
         "title": this.notification.title,
       },
       "priority": this.priority,
-      "dta": {
+      "data": {
         "click_action": this.data.click_action,
         "id": this.data.id,
         "status": this.data.status

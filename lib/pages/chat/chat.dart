@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_flux/flutter_flux.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:myapp/models/user.dart';
 import 'package:myapp/models/notification.dart';
+import 'package:myapp/models/message.dart';
 
 import 'package:myapp/request/chat-request.dart';
 import 'package:myapp/request/push-notification.dart';
 
-import 'package:myapp/models/message.dart';
 import 'package:myapp/flux/message.dart';
+import 'package:myapp/flux/user.dart';
 
 class ChatWidget extends StatefulWidget {
   User user;
+  String roomid;
 
-  ChatWidget({Key key, @required this.user}) : super(key: key);
+  ChatWidget({Key key, @required this.user, this.roomid}) : super(key: key);
 
   @override
   createState() => new ChatWidgetState();
@@ -24,7 +29,7 @@ class ChatWidgetState extends State<ChatWidget>
   Request request;
 
   User user;
-  String roomid = '18f4c2e336e243696fefa4d5faf1a76061ea5816';
+  String roomid;
   int last;
 
   List<dynamic> deviceTokens = [];
@@ -32,15 +37,30 @@ class ChatWidgetState extends State<ChatWidget>
   List<Message> messages = [];
 
   MessageStore messageStore;
+  UserStore userStore;
+
+  FocusNode _focusNode;
+
+  final _key = new GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     this.user = widget.user;
+    this.roomid = widget.roomid;
     this.request = new Request();
+
     this.messageStore = listenToStore(MessageStoreToken);
+    this.userStore = listenToStore(UserStoreToken);
 
     this._loadLogs();
     this._loadDeviceTokens();
+
+    this._focusNode = new FocusNode();
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        print(_focusNode.hashCode);
+      }
+    });
   }
 
   List<Message> _loadLogsFromStore() {
@@ -56,8 +76,8 @@ class ChatWidgetState extends State<ChatWidget>
 
     if (tokens != null) {
       this.deviceTokens = tokens;
-      print(this.deviceTokens);
-      print(tokens);
+      // print(this.deviceTokens);
+      // print(tokens);
     }
   }
 
@@ -70,7 +90,6 @@ class ChatWidgetState extends State<ChatWidget>
 
       if (data != null) {
         int _last = data['last'];
-
         data['user'] = user.id;
         await setUserMessageAction(data);
         logs = _loadLogsFromStore();
@@ -99,6 +118,147 @@ class ChatWidgetState extends State<ChatWidget>
     );
   }
 
+  ImageProvider _renderImage(String src) {
+    if (src != null && src != "") {
+      return NetworkImage(src);
+    } else {
+      return AssetImage('sources/default_avatar.jpg');
+    }
+  }
+
+  Widget _renderAvatar(String src, [bool left]) {
+    return Container(
+      width: 40.0,
+      height: 40.0,
+      margin: left == true || left == null
+          ? EdgeInsets.only(right: 10.0)
+          : EdgeInsets.only(left: 10.0),
+      decoration: BoxDecoration(
+        border: Border.all(
+          width: 2.0,
+          color: Colors.blue,
+        ),
+        borderRadius: BorderRadius.all(
+          new Radius.circular(20.0),
+        ),
+        image: DecorationImage(
+          fit: BoxFit.fitWidth,
+          image: this._renderImage(src),
+        ),
+      ),
+    );
+  }
+
+  Widget _renderLog(Message msg) {
+    // if (msg.type != 'text') print(msg.sourceid);
+    return Column(
+      crossAxisAlignment: msg.from == user.id
+          ? CrossAxisAlignment.start
+          : CrossAxisAlignment.end,
+      children: <Widget>[
+        Text(
+          msg.content.toString(),
+          style: TextStyle(color: Colors.white, fontSize: 18.0),
+        ),
+      ],
+    );
+  }
+
+  Widget _renderRightLog(Message msg) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10.0),
+      child: Flex(
+        direction: Axis.horizontal,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Flexible(
+            flex: 1,
+            fit: FlexFit.tight,
+            child: Flex(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              direction: Axis.vertical,
+              children: <Widget>[
+                GestureDetector(
+                  onLongPress: () {
+                    Clipboard.setData(new ClipboardData(text: msg.content));
+                    Fluttertoast.showToast(
+                      msg: "Content Copied",
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.BOTTOM,
+                      timeInSecForIos: 1,
+                    );
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(bottom: 5.0),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 15.0,
+                      vertical: 10.0,
+                    ),
+                    decoration: ShapeDecoration(
+                      color: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
+                    constraints: BoxConstraints(
+                      maxWidth: 250.0,
+                    ),
+                    child: this._renderLog(msg),
+                  ),
+                ),
+                Text(
+                  DateFormat('yyyy-MM-dd HH:mm:ss').format(
+                    DateTime.fromMillisecondsSinceEpoch(msg.timestamp),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          this._renderAvatar(userStore.me.avatar, false),
+        ],
+      ),
+    );
+  }
+
+  Widget _renderLeftLog(Message msg) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10.0),
+      child: Flex(
+        direction: Axis.horizontal,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          this._renderAvatar(user.avatar),
+          Flexible(
+            flex: 1,
+            fit: FlexFit.tight,
+            child: Flex(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              direction: Axis.vertical,
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 15.0,
+                    vertical: 10.0,
+                  ),
+                  decoration: ShapeDecoration(
+                    color: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  constraints: BoxConstraints(
+                    maxWidth: 250.0,
+                  ),
+                  child: this._renderLog(msg),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _renderLogs() {
     if (this.messages.length == 0) {
       return Center(
@@ -106,18 +266,32 @@ class ChatWidgetState extends State<ChatWidget>
       );
     } else {
       return ListView.builder(
-        itemCount: this.messages.length * 10,
+        reverse: true,
+        padding: EdgeInsets.symmetric(
+          horizontal: 10.0,
+          vertical: 15.0,
+        ),
+        itemCount: this.messages.length,
         itemBuilder: (BuildContext context, int index) {
-          Message msg = this.messages[index % messages.length];
-          return Text(msg.content.toString());
+          Message msg = this.messages[index];
+          return Container(
+            child: msg.from == user.id
+                ? this._renderLeftLog(msg)
+                : this._renderRightLog(msg),
+          );
         },
       );
     }
   }
 
+  void _dismissKeyboard() {
+    FocusScope.of(context).requestFocus(new FocusNode());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _key,
       appBar: AppBar(
         title: Text(user.name),
       ),
@@ -129,20 +303,62 @@ class ChatWidgetState extends State<ChatWidget>
         children: <Widget>[
           Flexible(
             flex: 1,
-            child: Scaffold(
-              body: this._renderLogs(),
+            child: GestureDetector(
+              key: Key(
+                DateTime.now().millisecondsSinceEpoch.toString(),
+              ),
+              onTap: _dismissKeyboard,
+              child: Scaffold(
+                body: this._renderLogs(),
+              ),
             ),
           ),
-          RaisedButton(
-            onPressed: () {
-              push({
-                'data': this._create_notify(messages[0]).toJson(),
-                "tokens": [
-                  "cB7s9dqiMbk:APA91bGvv76i4Wea7Yjq8s9wDbiar_uZrhYva4EFbZtICNv6Wxj6Orko3cBQUrR8WIDV0jW8RQOlpe98u1WXAmSuKghp70rdF4qEET_2aRjfQDt9a3piNru9Z-n4Hc83C2nQYPZ2v5-2QlDBJl8MyUpJ7i4H7eARpA"
-                ]
-              });
-            },
-            child: Text('GGG'),
+          Container(
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  width: 0.5,
+                  color: Colors.black26,
+                ),
+              ),
+            ),
+            padding: EdgeInsets.only(
+              bottom: 34.0,
+              left: 10.0,
+              right: 10.0,
+            ),
+            child: Flex(
+              direction: Axis.horizontal,
+              children: <Widget>[
+                Flexible(
+                  flex: 1,
+                  child: TextField(
+                    onSubmitted: (String value) {
+                      print(value);
+                    },
+                    focusNode: this._focusNode,
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.black87,
+                    ),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'Text',
+                    ),
+                  ),
+                ),
+                IconButton(
+                  color: Colors.blue,
+                  onPressed: () {
+                    print('press');
+                    this._dismissKeyboard();
+                  },
+                  icon: Icon(
+                    Icons.send,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
