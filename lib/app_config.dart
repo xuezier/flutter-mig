@@ -21,4 +21,6 @@ class AppConfig {
     "port": 9999,
     "url_root": "http://127.0.0.1:9999"
   };
+
+  static final String push_url = 'http://127.0.0.1:5555/api/push-notification';
 }

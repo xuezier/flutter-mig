@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_flux/flutter_flux.dart';
 
 import 'package:myapp/models/user.dart';
+import 'package:myapp/models/notification.dart';
 
 import 'package:myapp/request/chat-request.dart';
+import 'package:myapp/request/push-notification.dart';
 
 import 'package:myapp/models/message.dart';
 import 'package:myapp/flux/message.dart';
@@ -25,6 +27,8 @@ class ChatWidgetState extends State<ChatWidget>
   String roomid = '18f4c2e336e243696fefa4d5faf1a76061ea5816';
   int last;
 
+  List<dynamic> deviceTokens = [];
+
   List<Message> messages = [];
 
   MessageStore messageStore;
@@ -36,6 +40,7 @@ class ChatWidgetState extends State<ChatWidget>
     this.messageStore = listenToStore(MessageStoreToken);
 
     this._loadLogs();
+    this._loadDeviceTokens();
   }
 
   List<Message> _loadLogsFromStore() {
@@ -45,9 +50,20 @@ class ChatWidgetState extends State<ChatWidget>
         );
   }
 
+  void _loadDeviceTokens() async {
+    List<dynamic> tokens =
+        await request.get('/api/badge/device-tokens/${user.id}');
+
+    if (tokens != null) {
+      this.deviceTokens = tokens;
+      print(this.deviceTokens);
+      print(tokens);
+    }
+  }
+
   void _loadLogs() async {
     List<Message> logs = this._loadLogsFromStore();
-    print(logs);
+    // print(logs);
     if (logs == null || logs.length == 0) {
       Map<String, dynamic> data =
           await request.get('/api/message/$roomid', {'last': last});
@@ -55,14 +71,12 @@ class ChatWidgetState extends State<ChatWidget>
       if (data != null) {
         int _last = data['last'];
 
-        print(last);
-        this.last = _last;
         data['user'] = user.id;
-        setUserMessageAction(data).then((List list) {
-          print(list);
-          logs = _loadLogsFromStore();
-          this._setMessages(logs);
-        });
+        await setUserMessageAction(data);
+        logs = _loadLogsFromStore();
+
+        this.last = _last;
+        this._setMessages(logs);
       }
     } else {
       this._setMessages(logs);
@@ -73,6 +87,16 @@ class ChatWidgetState extends State<ChatWidget>
     setState(() {
       this.messages.addAll(logs);
     });
+  }
+
+  Notify _create_notify(Message msg) {
+    return new Notify(
+      notification: NotificationTemple(
+        title: user.name,
+        body: msg.content,
+      ),
+      data: NotificationData(id: 1),
+    );
   }
 
   Widget _renderLogs() {
@@ -109,7 +133,17 @@ class ChatWidgetState extends State<ChatWidget>
               body: this._renderLogs(),
             ),
           ),
-          Text('GGG')
+          RaisedButton(
+            onPressed: () {
+              push({
+                'data': this._create_notify(messages[0]).toJson(),
+                "tokens": [
+                  "cB7s9dqiMbk:APA91bGvv76i4Wea7Yjq8s9wDbiar_uZrhYva4EFbZtICNv6Wxj6Orko3cBQUrR8WIDV0jW8RQOlpe98u1WXAmSuKghp70rdF4qEET_2aRjfQDt9a3piNru9Z-n4Hc83C2nQYPZ2v5-2QlDBJl8MyUpJ7i4H7eARpA"
+                ]
+              });
+            },
+            child: Text('GGG'),
+          ),
         ],
       ),
     );

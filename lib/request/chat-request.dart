@@ -14,8 +14,11 @@ class Request {
 
   final String url_root = AppConfig.chat['url_root'];
 
+  final RegExp Url_Reg = new RegExp('^[http|https]');
+
   Request() {
     Token.loadFromStorage();
+    print(Url_Reg);
   }
 
   dynamic get(String url, [Map<String, dynamic> body]) async {
@@ -49,7 +52,9 @@ class Request {
   }
 
   dynamic post(String url, dynamic body) async {
-    url = url_root + url;
+    if (!Url_Reg.hasMatch(url)) {
+      url = url_root + url;
+    }
     Response response = await this.httpClient.post(url,
         headers: {
           "Authorization": "Bearer " + Token.access_token,
