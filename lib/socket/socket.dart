@@ -33,8 +33,10 @@ class Socket {
       url += '/socket.io/?EIO=' + EIO.toString() + '&transport=websocket';
     }
 
-    this.channel = IOWebSocketChannel.connect(url,
-        pingInterval: Duration(milliseconds: 25000));
+    this.channel = IOWebSocketChannel.connect(
+      url,
+      pingInterval: Duration(milliseconds: 25000),
+    );
 
     channel.stream.listen((event) {
       this.parseListen(event);
@@ -51,18 +53,30 @@ class Socket {
     } else {
       this.channel.sink.close();
     }
+    this.timer.toString();
+    this.connected = false;
+    this.disconnected = true;
     this.emit('disconnect', closeReason);
   }
 
   void _did_heat_beat() {
     timer = new Timer(new Duration(milliseconds: _heartbeat_time_out), () {
-      this.channel.sink.add(CONNECT);
+      // this.channel.sink.add('pong');
+      if (this.connected == true) {
+        this._pong();
+      }
       this._did_heat_beat();
     });
   }
 
   void _stop_heat_beat() {
     timer.cancel();
+  }
+
+  void _pong() {
+    String sender = packetMessage('probe', 'pong');
+    print(sender);
+    this.channel.sink.add(sender);
   }
 
   void emit(String name, [dynamic data]) {
@@ -151,6 +165,8 @@ class Socket {
       if (events[0] == CONNECT) {
         // print('connected');
         this.emit('connect');
+        this.connected = true;
+        this.disconnected = false;
       } else if (events[0] == DISCONNECT) {
         this.emit('disconnect');
       }
@@ -163,6 +179,8 @@ class Socket {
           dynamic _data = data[1];
           if (_event == MESSAGE_EVENT) {
             this.processMessage(_data);
+          } else {
+            print(_event);
           }
         } else if (socket_event == ERROR) {
           List<dynamic> data = JSON.decode(match.group(2));

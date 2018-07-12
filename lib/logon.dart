@@ -7,6 +7,7 @@ import 'package:myapp/request/request.dart';
 import 'package:myapp/flux/user.dart';
 import 'package:myapp/flux/chat.dart';
 import 'package:myapp/flux/contacts.dart';
+import 'package:myapp/flux/device.dart';
 
 import 'package:myapp/request/chat-request.dart' as ChatRequest;
 
@@ -23,6 +24,7 @@ class LogonWidgetState extends State<LogonWidget>
   UserStore userStore;
   ChatStore chatStore;
   ContactsStore contactsStore;
+  DeviceStore deviceStore;
 
   Request request = new Request();
   ChatRequest.Request chatRequest = new ChatRequest.Request();
@@ -32,6 +34,7 @@ class LogonWidgetState extends State<LogonWidget>
     userStore = listenToStore(UserStoreToken);
     chatStore = listenToStore(ChatStoreToken);
     contactsStore = listenToStore(ContactsStoreToken);
+    this.deviceStore = listenToStore(DeviceStoreToken);
 
     this._init_load();
     // _loadInfo();
@@ -78,6 +81,7 @@ class LogonWidgetState extends State<LogonWidget>
         await initConnectAction();
         await entryAction();
         await setContactsListAction(contacts);
+        await initDeviceInfoAction();
 
         Navigator.pushReplacementNamed(context, '/main');
       }

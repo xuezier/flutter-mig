@@ -26,8 +26,9 @@ Match parser(String data) {
   return matches.first;
 }
 
-String packetMessage(String data) {
-  return '4$EVENT["message","' + data + '"]';
+String packetMessage(String data, [String type]) {
+  if (type == null) type = 'message';
+  return '4$EVENT["$type","' + data + '"]';
 }
 
 String packet16String(List<int> list) {

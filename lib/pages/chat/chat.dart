@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_flux/flutter_flux.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -40,8 +41,10 @@ class ChatWidgetState extends State<ChatWidget>
   UserStore userStore;
 
   FocusNode _focusNode;
+  ScrollController _scrollController;
 
   final _key = new GlobalKey<ScaffoldState>();
+  bool _isloading = false;
 
   @override
   void initState() {
@@ -61,6 +64,24 @@ class ChatWidgetState extends State<ChatWidget>
         print(_focusNode.hashCode);
       }
     });
+
+    this._scrollController = new ScrollController();
+    _scrollController.addListener(() {
+      // double offset = _scrollController.offset;
+      // bool outOfRange = _scrollController.position.outOfRange;
+      // if (offset > 0 && outOfRange == true) {
+      //   // print(offset);
+      //   this._loadLogs();
+      // }
+    });
+  }
+
+  @override
+  void dispose() {
+    this._focusNode.dispose();
+    this._scrollController.dispose();
+
+    super.dispose();
   }
 
   List<Message> _loadLogsFromStore() {
@@ -82,23 +103,36 @@ class ChatWidgetState extends State<ChatWidget>
   }
 
   void _loadLogs() async {
-    List<Message> logs = this._loadLogsFromStore();
-    // print(logs);
-    if (logs == null || logs.length == 0) {
-      Map<String, dynamic> data =
-          await request.get('/api/message/$roomid', {'last': last});
-
-      if (data != null) {
-        int _last = data['last'];
-        data['user'] = user.id;
-        await setUserMessageAction(data);
-        logs = _loadLogsFromStore();
-
-        this.last = _last;
-        this._setMessages(logs);
-      }
+    if (this._isloading == true) {
+      return;
     } else {
-      this._setMessages(logs);
+      this._isloading = true;
+
+      List<Message> logs = this._loadLogsFromStore();
+      // print(logs);
+      if (logs == null || logs.length == 0) {
+        Map<String, dynamic> data = await request.get('/api/message/$roomid',
+            {'last': last == null ? '' : last.toString()});
+
+        if (data != null) {
+          int _last = data['last'];
+          data['user'] = user.id;
+          await setUserMessageAction(data);
+          logs = _loadLogsFromStore();
+
+          print(_last);
+          if (_last != null && _last != '0' && _last != 0) {
+            this.last = _last;
+          }
+          this._setMessages(logs);
+
+          this._isloading = false;
+        }
+      } else {
+        this._setMessages(logs);
+
+        this._isloading = false;
+      }
     }
   }
 
@@ -267,6 +301,7 @@ class ChatWidgetState extends State<ChatWidget>
     } else {
       return ListView.builder(
         reverse: true,
+        controller: _scrollController,
         padding: EdgeInsets.symmetric(
           horizontal: 10.0,
           vertical: 15.0,

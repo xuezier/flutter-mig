@@ -22,7 +22,7 @@ class MeWidgetState extends State<MeWidget> with StoreWatcherMixin<MeWidget> {
   Widget _buildText(String text) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 12.0),
-      margin: EdgeInsets.only(top: 12.0, bottom: 12.0),
+      // margin: EdgeInsets.only(top: 12.0, bottom: 12.0),
       child: Text(
         text,
         style: TextStyle(

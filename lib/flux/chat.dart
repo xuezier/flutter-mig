@@ -85,7 +85,8 @@ class ChatStore extends Store {
     triggerOnAction(entryAction, ([any]) {
       Completer completer = new Completer();
       client.init(
-        host: this.host,
+        host: AppConfig.pomelo['host'],
+        // host: this.host,
         port: this.port,
         callback: () {
           client.request(
@@ -115,6 +116,8 @@ class ChatStore extends Store {
 
           String me = map['me'];
           List<User> contacts = map['contacts'];
+
+          List<Map<String, dynamic>> _rooms = [];
           for (int index = 0; index < list.length; index++) {
             Map item = list[index];
             Map room = item['room'];
@@ -127,7 +130,7 @@ class ChatStore extends Store {
             User contact = contacts.firstWhere((User c) {
               return c.id == target;
             });
-            this.rooms.add({
+            _rooms.add({
               "roomid": room['roomid'],
               "message": Message(item['message']),
               'last_active:': room['last_active:'],
@@ -135,6 +138,7 @@ class ChatStore extends Store {
               'user': contact
             });
           }
+          this.rooms = _rooms;
         }
       });
       return completer.future;
